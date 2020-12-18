@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+<script src="map_data.js"></script>
+<script src="agentmaps.js"></script>
+</head>
+
+<body>
+<div id="demo_map" style="height:500px"></div>
+
+<script>
+    let bounding_points = [[39.9058, -86.0910], [39.8992, -86.1017]]; 
+    let map = L.map("demo_map").fitBounds(bounding_points);
+    L.tileLayer(
+        "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", 
+        { attribution: "Thanks to <a href=\"http://openstreetmap.org\">OpenStreetMap</a> community" }
+    ).addTo(map);
+    let agentmap = L.A.agentmap(map);
+    agentmap.buildingify(bounding_points, map_data);   
+    agentmap.agentify(50, agentmap.seqUnitAgentMaker);
+    agentmap.controller = function() {
+        if (agentmap.state.ticks % 300 == 0) {
+            agentmap.agents.eachLayer(function(agent) {
+                let random_index = Math.floor(agentmap.units.count() * Math.random()),
+                    random_unit = agentmap.units.getLayers()[random_index],
+                    random_unit_id = agentmap.units.getLayerId(random_unit),
+                    random_unit_center = random_unit.getBounds().getCenter();
+                agent.scheduleTrip(random_unit_center, { type: "unit", id: random_unit_id }, 1, false, true)
+               
+            })
+        }
+        agent.moveIt()
+   
+}
+agentmap.run()
+
+</script>
+
+</body>
+
+</html>
